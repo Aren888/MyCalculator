@@ -44,6 +44,12 @@ class CalculatorVIewController: UIViewController {
         
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
+        
+        self.viewModel.updateViews = { [weak self] in
+            DispatchQueue.main.async { [weak self] in
+                self?.collectionView.reloadData()
+            }
+        }
     }
     
     
@@ -83,14 +89,15 @@ extension CalculatorVIewController: UICollectionViewDelegate, UICollectionViewDa
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        //      Cell Spacing
         let totalCellHeight = view.frame.size.width
         let totalVerticalCellSpacing = CGFloat(10*4)
-        
+        //      Screen height
         let window = view.window?.windowScene?.keyWindow
         let topPadding = window?.safeAreaInsets.top ?? 0
-        
         let bottomPadding = window?.safeAreaInsets.bottom ?? 0
         let avaliableScreenHeight = view.frame.size.height - topPadding - bottomPadding
+        //      Calculate Header Height
         let headerHeight = avaliableScreenHeight - totalCellHeight - totalVerticalCellSpacing
         
         return CGSize (width: view.frame.size.width, height: headerHeight)
@@ -108,6 +115,12 @@ extension CalculatorVIewController: UICollectionViewDelegate, UICollectionViewDa
         
         let calculatorButton = self.viewModel.CalculatorButtonCells[indexPath.row]
         cell.configure(with: calculatorButton)
+        
+        if let operation = self.viewModel.operation, self.viewModel.secondNumber == nil {
+            if operation.title == calculatorButton.title {
+                cell.setOperationSelected()
+            }
+        }
         return cell
     }
     
@@ -138,6 +151,6 @@ extension CalculatorVIewController: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let buttonCell = self.viewModel.CalculatorButtonCells[indexPath.row]
-        print(buttonCell.title)
+        self.viewModel.didSelectButton(with: buttonCell)
     }
 }
