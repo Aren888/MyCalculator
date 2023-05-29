@@ -16,7 +16,7 @@ enum CalculatorOperation {
     var title: String {
         switch self {
         case .divide:
-            return "/"
+            return "÷"
         case .multiply:
             return "x"
         case .subtract:

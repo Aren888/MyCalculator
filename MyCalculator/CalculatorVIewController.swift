@@ -7,27 +7,25 @@
 
 import UIKit
 
-class CalculatorVIewController: UIViewController {
+class CalculatorViewController: UIViewController {
     
-    //  MARK: - VARIABLES
+    // MARK: - Variables
+    let viewModel: CalcControllerViewModel
     
-    let viewModel: CalculatorControllerVIewModel
-    
-    //  MARK: - UI COMPONENTS
-    
+    // MARK: - UI Components
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         
-        let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .black
         collectionView.register(CalculatorHeaderCell.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CalculatorHeaderCell.identifier)
         collectionView.register(ButtonCell.self, forCellWithReuseIdentifier: ButtonCell.identifier)
         return collectionView
     }()
-    
-    //  MARK: - LIFECICLE
-    init(_ viewModel: CalculatorControllerVIewModel = CalculatorControllerVIewModel()) {
+
+    // MARK: - Lifecycle
+    init(_ viewModel: CalcControllerViewModel = CalcControllerViewModel()) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -36,11 +34,11 @@ class CalculatorVIewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .systemPurple
-        setupUI()
+        self.setupUI()
+        
         
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
@@ -51,83 +49,83 @@ class CalculatorVIewController: UIViewController {
             }
         }
     }
-    
-    
-    //  MARK: - UI SETUP
+
+    // MARK: - UI Setup
     private func setupUI() {
         self.view.addSubview(self.collectionView)
-        
         self.collectionView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
         ])
     }
 }
 
-
-
-//  MARK: - CollectionView Methods
-
-extension CalculatorVIewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+// MARK: - CollectionView Methods
+extension CalculatorViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
-    //    MARK: - Section Header Cell
-    
+    // MARK: - Section Header Cell
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        1
+        return 1
     }
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: CalculatorHeaderCell.identifier, for: indexPath) as? CalculatorHeaderCell else {
-            fatalError ("Failed to dequeue CalcHeaderCell in CalcController")
-            
+            fatalError("Failed to dequeue CalcHeaderCell in CalcController")
         }
-        header.configure(curentCalculatorText: self.viewModel.calculatorHeaderLabel)
+        header.configure(curentCalculatorText: self.viewModel.calcHeaderLabel)
         return header
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        //      Cell Spacing
+        
+        // Cell Spacing
         let totalCellHeight = view.frame.size.width
         let totalVerticalCellSpacing = CGFloat(10*4)
-        //      Screen height
+        
+        // Screen height
         let window = view.window?.windowScene?.keyWindow
         let topPadding = window?.safeAreaInsets.top ?? 0
         let bottomPadding = window?.safeAreaInsets.bottom ?? 0
+        
         let avaliableScreenHeight = view.frame.size.height - topPadding - bottomPadding
-        //      Calculate Header Height
+        
+        // Calculate Header Height
         let headerHeight = avaliableScreenHeight - totalCellHeight - totalVerticalCellSpacing
         
-        return CGSize (width: view.frame.size.width, height: headerHeight)
+        return CGSize(width: view.frame.size.width, height: headerHeight)
     }
     
-    //  MARK: - Normal Cells (Buttons)
+    // MARK: - Normal Cells (Buttons)
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        self.viewModel.CalculatorButtonCells.count
+        return self.viewModel.calcButtonCells.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ButtonCell.identifier, for: indexPath) as? ButtonCell else {
-            fatalError("Failed to dequeue ButtonCel1 in CalculatorVIewController.")
+            fatalError("Failed to dequeue ButtonCell in CalcController.")
         }
+        let calcButton = self.viewModel.calcButtonCells[indexPath.row]
         
-        let calculatorButton = self.viewModel.CalculatorButtonCells[indexPath.row]
-        cell.configure(with: calculatorButton)
+        cell.configure(with: calcButton)
         
         if let operation = self.viewModel.operation, self.viewModel.secondNumber == nil {
-            if operation.title == calculatorButton.title {
+            if operation.title == calcButton.title {
                 cell.setOperationSelected()
             }
         }
+        
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        let calculatorButton = self.viewModel.CalculatorButtonCells[indexPath.row]
-        switch calculatorButton {
+        let calcButton = self.viewModel.calcButtonCells[indexPath.row]
+        
+        switch calcButton {
         case let .number(int) where int == 0:
             return CGSize(
                 width: (view.frame.size.width/5)*2 + ((view.frame.size.width/5)/3),
@@ -150,7 +148,8 @@ extension CalculatorVIewController: UICollectionViewDelegate, UICollectionViewDa
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let buttonCell = self.viewModel.CalculatorButtonCells[indexPath.row]
+        let buttonCell = self.viewModel.calcButtonCells[indexPath.row]
         self.viewModel.didSelectButton(with: buttonCell)
     }
+    
 }

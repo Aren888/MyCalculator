@@ -5,7 +5,6 @@
 //  Created by Aren Musayelyan on 28.05.23.
 //
 
-import Foundation
 import UIKit
 
 enum CalculatorButton {
@@ -20,22 +19,23 @@ enum CalculatorButton {
     case number(Int)
     case decimal
     
-    init(calculatorButton: CalculatorButton) {
-        switch calculatorButton {
-        case .allClear, .plusMinus, .percentage, .divide, .multiply, .subtract, .add, .equals, .decimal:
-            self = calculatorButton
+    init(calcButton: CalculatorButton) {
+        
+        switch calcButton {
+        case .allClear, .plusMinus, .percentage, .divide, .multiply, .add, .equals, .decimal, .subtract:
+            self = calcButton
         case .number(let int):
             if int.description.count == 1 {
-                self = calculatorButton
+                self = calcButton
             } else {
-                fatalError("CalculatorButton .number Int was not 1 digit during init!")
+                fatalError("CalculatorButton.number Int was not 1 digit during init")
             }
         }
     }
 }
 
-
 extension CalculatorButton {
+    
     var title: String {
         switch self {
         case .allClear:
@@ -45,7 +45,7 @@ extension CalculatorButton {
         case .percentage:
             return "%"
         case .divide:
-            return "/"
+            return "÷"
         case .multiply:
             return "x"
         case .subtract:
@@ -59,15 +59,16 @@ extension CalculatorButton {
         case .decimal:
             return "."
         }
-        
     }
     
     var color: UIColor {
         switch self {
         case .allClear, .plusMinus, .percentage:
-            return.lightGray
+            return .lightGray
+            
         case .divide, .multiply, .subtract, .add, .equals:
             return .systemOrange
+            
         case .number, .decimal:
             return .darkGray
         }
@@ -77,8 +78,10 @@ extension CalculatorButton {
         switch self {
         case .allClear, .plusMinus, .percentage, .equals, .number, .decimal:
             return nil
+            
         case .divide, .multiply, .subtract, .add:
             return .white
         }
     }
+    
 }
